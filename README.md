@@ -112,16 +112,32 @@ codegen.exe User      # Windows
 
 That's it! CodeGen created `Models/User.cs` with your template.
 
-## � Creating Templates
+## 📝 Creating Templates
 
 Templates are text files with special comments that tell CodeGen where to save the generated file:
 
 ```csharp
 // META: output=path/to/{{EntityName}}.cs
+// META: tags=entity, model
 
 // Your code here with {{EntityName}} variable
 public class {{EntityName}} { }
 ```
+
+### Template Metadata
+
+Add metadata at the top of your template files:
+
+```csharp
+// META: output=Models/{{EntityName}}.cs
+// META: tags=entity, model, domain
+// META: description=Domain entity class
+```
+
+**Available Metadata:**
+- `output` (required) - Where to save the generated file
+- `tags` (optional) - Tags for filtering templates
+- `description` (optional) - Template description
 
 ### Available Variables
 
@@ -149,9 +165,56 @@ codegen Order
 codegen.exe User      # Windows
 ```
 
+### Filter by Tags
+
+Generate only templates with specific tags:
+
+```bash
+# Generate only model (with "model" tag)
+codegen --entity User --tags model
+
+# Short form
+codegen -e User -g model
+
+# Multiple tags (generates templates with ANY of these tags)
+codegen -e Product -g entity,service,controller
+
+# Legacy format also works
+codegen User templates model
+```
+
+**How Tags Work:**
+- If you don't specify tags, ALL templates are generated
+- If you specify tags, only templates with at least ONE matching tag are generated
+- Templates can have multiple tags: `// META: tags=entity, model, domain`
+
+**Example:**
+```csharp
+// Template 1: model.template.cs
+// META: tags=entity, model
+
+// Template 2: service.template.cs  
+// META: tags=entity, service
+
+// Template 3: controller.template.cs
+// META: tags=entity, controller, api
+```
+
+```bash
+codegen -e User -g model         # Generates only template 1
+codegen -e User -g service       # Generates only template 2
+codegen -e User -g entity        # Generates all 3 (all have "entity")
+codegen -e User                  # Generates all 3 (no filter)
+```
+
 ### Use Custom Template Folder
 
 ```bash
+# Named arguments
+codegen --entity User --templates my-templates
+codegen -e User -t my-templates
+
+# Legacy format
 codegen User my-templates
 ```
 
@@ -182,6 +245,52 @@ project/
 codegen User templates-api
 codegen Product templates-domain
 codegen Order templates-tests
+```
+
+## 🔧 CLI Reference
+
+### Command Syntax
+
+```bash
+# Named arguments (recommended)
+codegen --entity <name> [--templates <path>] [--tags <tags>]
+codegen -e <name> [-t <path>] [-g <tags>]
+
+# Legacy format (still supported)
+codegen <EntityName> [TemplatesFolder] [Tags]
+```
+
+### Arguments
+
+| Argument | Short | Description | Default |
+|----------|-------|-------------|---------|
+| `--entity` | `-e` | Entity name (required) | - |
+| `--templates` | `-t` | Templates folder path | `templates` |
+| `--tags` | `-g` | Filter by tags (comma-separated) | All templates |
+| `--help` | `-h` | Show help message | - |
+
+### Examples
+
+```bash
+# Basic usage
+codegen --entity Product
+codegen -e User
+
+# Custom templates folder
+codegen --entity Order --templates my-templates
+codegen -e Customer -t ./api-templates
+
+# Filter by tags
+codegen --entity Invoice --tags entity
+codegen -e Product -g model,service
+
+# Combine all options
+codegen -e Order -t templates -g entity,controller,service
+
+# Legacy format (still works)
+codegen Product
+codegen User templates
+codegen Order templates entity,service
 ```
 
 ## ❓ FAQ

@@ -87,6 +87,74 @@ public class Test {}
         Assert.False(template.Metadata.IsValid);
     }
 
+    [Fact]
+    public void ProcessTemplateFile_ShouldExtractTags()
+    {
+        // Arrange
+        var templatePath = CreateTempTemplate(@"
+// META: filename={{EntityName}}.cs
+// META: output=generated/{{EntityName}}.cs
+// META: tags=entity, model, domain
+
+namespace Test;
+
+public class {{EntityName}} {}
+");
+
+        // Act
+        var template = _processor.ProcessTemplateFile(templatePath);
+
+        // Assert
+        Assert.Equal(3, template.Metadata.Tags.Count);
+        Assert.Contains("entity", template.Metadata.Tags);
+        Assert.Contains("model", template.Metadata.Tags);
+        Assert.Contains("domain", template.Metadata.Tags);
+    }
+
+    [Fact]
+    public void ProcessTemplateFile_ShouldHandleEmptyTags()
+    {
+        // Arrange
+        var templatePath = CreateTempTemplate(@"
+// META: filename={{EntityName}}.cs
+// META: output=generated/{{EntityName}}.cs
+
+namespace Test;
+
+public class {{EntityName}} {}
+");
+
+        // Act
+        var template = _processor.ProcessTemplateFile(templatePath);
+
+        // Assert
+        Assert.Empty(template.Metadata.Tags);
+    }
+
+    [Fact]
+    public void ProcessTemplateFile_ShouldTrimTagsWhitespace()
+    {
+        // Arrange
+        var templatePath = CreateTempTemplate(@"
+// META: filename={{EntityName}}.cs
+// META: output=generated/{{EntityName}}.cs
+// META: tags=  entity  ,  model  ,  domain  
+
+namespace Test;
+
+public class {{EntityName}} {}
+");
+
+        // Act
+        var template = _processor.ProcessTemplateFile(templatePath);
+
+        // Assert
+        Assert.Equal(3, template.Metadata.Tags.Count);
+        Assert.Contains("entity", template.Metadata.Tags);
+        Assert.Contains("model", template.Metadata.Tags);
+        Assert.Contains("domain", template.Metadata.Tags);
+    }
+
     private string CreateTempTemplate(string content)
     {
         var path = Path.Combine(_tempDir, $"template-{Guid.NewGuid()}.template.cs");

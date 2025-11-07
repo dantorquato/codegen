@@ -63,6 +63,12 @@ public class TemplateProcessor
                 case "description":
                     metadata.Description = value;
                     break;
+                case "tags":
+                    metadata.Tags = value.Split(',')
+                        .Select(t => t.Trim())
+                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                        .ToList();
+                    break;
             }
         }
 

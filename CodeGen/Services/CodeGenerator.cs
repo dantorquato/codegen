@@ -19,7 +19,7 @@ public class CodeGenerator
     /// <summary>
     /// Generates code from all templates in the specified directory
     /// </summary>
-    public void Generate(string templatesDir, string entityName, string baseDir)
+    public void Generate(string templatesDir, string entityName, string baseDir, List<string>? tags = null)
     {
         if (!Directory.Exists(templatesDir))
         {
@@ -34,22 +34,39 @@ public class CodeGenerator
             throw new InvalidOperationException($"No templates found in {templatesDir}");
         }
 
-        Console.WriteLine($"\n🚀 Generating code for entity: {entityName}\n");
+        Console.WriteLine($"\n🚀 Generating code for entity: {entityName}");
+        
+        if (tags != null && tags.Any())
+        {
+            Console.WriteLine($"🏷️  Filtering by tags: {string.Join(", ", tags)}");
+        }
+        
+        Console.WriteLine();
 
         var variables = _variableReplacer.CreateVariables(entityName);
+        int processedCount = 0;
+        int skippedCount = 0;
 
         foreach (var templateFile in templateFiles)
         {
-            ProcessTemplate(templateFile, variables, baseDir);
+            var result = ProcessTemplate(templateFile, variables, baseDir, tags);
+            if (result) processedCount++;
+            else skippedCount++;
         }
 
-        Console.WriteLine($"\n✨ Generation completed!\n");
+        Console.WriteLine($"\n✨ Generation completed! {processedCount} file(s) generated");
+        if (skippedCount > 0)
+        {
+            Console.WriteLine($"ℹ️  {skippedCount} template(s) skipped");
+        }
+        Console.WriteLine();
     }
 
     /// <summary>
     /// Processes a single template and generates the output file
     /// </summary>
-    private void ProcessTemplate(string templateFile, Dictionary<string, string> variables, string baseDir)
+    /// <returns>True if the template was processed and file generated, false if skipped</returns>
+    private bool ProcessTemplate(string templateFile, Dictionary<string, string> variables, string baseDir, List<string>? tags)
     {
         try
         {
@@ -60,7 +77,23 @@ public class CodeGenerator
             if (!template.Metadata.IsValid)
             {
                 Console.WriteLine($"⚠️  Template {Path.GetFileName(templateFile)} does not have 'output' metadata. Skipping.");
-                return;
+                return false;
+            }
+
+            // Filter by tags if specified
+            if (tags != null && tags.Any())
+            {
+                // If template has no tags, skip it when filtering
+                if (!template.Metadata.Tags.Any())
+                {
+                    return false;
+                }
+
+                // If template doesn't have any of the requested tags, skip it
+                if (!template.Metadata.HasAnyTag(tags))
+                {
+                    return false;
+                }
             }
 
             // Replaces variables in content
@@ -73,7 +106,7 @@ public class CodeGenerator
             if (File.Exists(outputPath))
             {
                 Console.WriteLine($"⏭️  File {outputPath} already exists. Skipping.");
-                return;
+                return false;
             }
 
             // Creates necessary directories
@@ -85,11 +118,18 @@ public class CodeGenerator
 
             // Writes the file
             File.WriteAllText(outputPath, content);
-            Console.WriteLine($"✅ File generated: {outputPath}");
+            
+            var tagsInfo = template.Metadata.Tags.Any() 
+                ? $" [{string.Join(", ", template.Metadata.Tags)}]" 
+                : "";
+            Console.WriteLine($"✅ File generated: {outputPath}{tagsInfo}");
+            
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Error processing template {Path.GetFileName(templateFile)}: {ex.Message}");
+            return false;
         }
     }
 }
