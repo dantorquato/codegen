@@ -54,6 +54,7 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
     
     - name: Build with Native AOT
+      shell: bash
       run: |
         dotnet publish CodeGen/CodeGen.csproj \
           -c Release \
