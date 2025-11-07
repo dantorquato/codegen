@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+dist/
+publish/
+templates/
+# Generated code (except examples)
+generated/
+
+# IDE
+*.user
+*.suo
+.vs/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
