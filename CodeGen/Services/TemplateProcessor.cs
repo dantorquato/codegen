@@ -54,9 +54,6 @@ public class TemplateProcessor
 
             switch (key)
             {
-                case "filename":
-                    metadata.FileName = value;
-                    break;
                 case "output":
                     metadata.Output = value;
                     break;

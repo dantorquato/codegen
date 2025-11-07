@@ -17,7 +17,6 @@ public class TemplateProcessorTests : IDisposable
     {
         // Arrange
         var templatePath = CreateTempTemplate(@"
-// META: filename={{EntityName}}.cs
 // META: output=generated/Models/{{EntityName}}.cs
 // META: description=Model class
 
@@ -30,7 +29,6 @@ public class {{EntityName}} {}
         var template = _processor.ProcessTemplateFile(templatePath);
 
         // Assert
-        Assert.Equal("{{EntityName}}.cs", template.Metadata.FileName);
         Assert.Equal("generated/Models/{{EntityName}}.cs", template.Metadata.Output);
         Assert.Equal("Model class", template.Metadata.Description);
     }
@@ -40,7 +38,6 @@ public class {{EntityName}} {}
     {
         // Arrange
         var templatePath = CreateTempTemplate(@"
-// META: filename=test.cs
 // META: output=test/test.cs
 
 namespace Test;
@@ -81,7 +78,6 @@ public class Test {}
         var template = _processor.ProcessTemplateFile(templatePath);
 
         // Assert
-        Assert.Null(template.Metadata.FileName);
         Assert.Null(template.Metadata.Output);
         Assert.Null(template.Metadata.Description);
         Assert.False(template.Metadata.IsValid);
@@ -92,7 +88,6 @@ public class Test {}
     {
         // Arrange
         var templatePath = CreateTempTemplate(@"
-// META: filename={{EntityName}}.cs
 // META: output=generated/{{EntityName}}.cs
 // META: tags=entity, model, domain
 
@@ -116,7 +111,6 @@ public class {{EntityName}} {}
     {
         // Arrange
         var templatePath = CreateTempTemplate(@"
-// META: filename={{EntityName}}.cs
 // META: output=generated/{{EntityName}}.cs
 
 namespace Test;
@@ -136,7 +130,6 @@ public class {{EntityName}} {}
     {
         // Arrange
         var templatePath = CreateTempTemplate(@"
-// META: filename={{EntityName}}.cs
 // META: output=generated/{{EntityName}}.cs
 // META: tags=  entity  ,  model  ,  domain  
 

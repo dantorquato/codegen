@@ -6,11 +6,6 @@ namespace CodeGen.Models;
 public class TemplateMetadata
 {
     /// <summary>
-    /// Name of the file to be generated (may contain variables)
-    /// </summary>
-    public string? FileName { get; set; }
-
-    /// <summary>
     /// Output path where the file will be created (may contain variables)
     /// </summary>
     public string? Output { get; set; }

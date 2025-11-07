@@ -130,14 +130,14 @@ Add metadata at the top of your template files:
 
 ```csharp
 // META: output=Models/{{EntityName}}.cs
-// META: tags=entity, model, domain
 // META: description=Domain entity class
+// META: tags=entity, model, domain
 ```
 
 **Available Metadata:**
-- `output` (required) - Where to save the generated file
-- `tags` (optional) - Tags for filtering templates
-- `description` (optional) - Template description
+- `output` (required) - Path where the generated file will be saved
+- `description` (optional) - Description of what the template generates
+- `tags` (optional) - Comma-separated tags for filtering templates
 
 ### Available Variables
 

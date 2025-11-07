@@ -26,8 +26,8 @@ public class CodeGenerator
             throw new DirectoryNotFoundException($"Templates directory not found: {templatesDir}");
         }
 
-        // Searches for all .template files
-        var templateFiles = Directory.GetFiles(templatesDir, "*.template.*", SearchOption.TopDirectoryOnly);
+        // Searches for all .template files recursively in subdirectories
+        var templateFiles = Directory.GetFiles(templatesDir, "*.template.*", SearchOption.AllDirectories);
 
         if (templateFiles.Length == 0)
         {
