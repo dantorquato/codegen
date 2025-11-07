@@ -1,0 +1,151 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Windows
+          - os: windows-latest
+            platform: Windows-x64
+            runtime: win-x64
+            extension: .exe
+            archive: zip
+          - os: windows-latest
+            platform: Windows-ARM64
+            runtime: win-arm64
+            extension: .exe
+            archive: zip
+          
+          # Linux
+          - os: ubuntu-latest
+            platform: Linux-x64
+            runtime: linux-x64
+            extension: ''
+            archive: tar.gz
+          - os: ubuntu-latest
+            platform: Linux-ARM64
+            runtime: linux-arm64
+            extension: ''
+            archive: tar.gz
+          
+          # macOS
+          - os: macos-latest
+            platform: macOS-Intel
+            runtime: osx-x64
+            extension: ''
+            archive: tar.gz
+          - os: macos-latest
+            platform: macOS-AppleSilicon
+            runtime: osx-arm64
+            extension: ''
+            archive: tar.gz
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    
+    - name: Get version from tag
+      id: version
+      shell: bash
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Build with Native AOT
+      run: |
+        dotnet publish CodeGen/CodeGen.csproj \
+          -c Release \
+          -r ${{ matrix.runtime }} \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=true \
+          -p:PublishAot=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          -p:Version=${{ steps.version.outputs.VERSION }} \
+          -o ./publish
+    
+    - name: Create archive (Windows)
+      if: matrix.archive == 'zip'
+      shell: pwsh
+      run: |
+        Compress-Archive -Path "./publish/CodeGen${{ matrix.extension }}" -DestinationPath "codegen-${{ steps.version.outputs.VERSION }}-${{ matrix.platform }}.zip"
+    
+    - name: Create archive (Unix)
+      if: matrix.archive == 'tar.gz'
+      run: |
+        cd publish
+        tar -czf "../codegen-${{ steps.version.outputs.VERSION }}-${{ matrix.platform }}.tar.gz" "CodeGen${{ matrix.extension }}"
+        cd ..
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: codegen-${{ matrix.platform }}
+        path: codegen-*.${{ matrix.archive }}
+        retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Get version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Display structure
+      run: ls -R artifacts/
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: CodeGen v${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        files: artifacts/**/*
+        body: |
+          ## CodeGen v${{ steps.version.outputs.VERSION }}
+          
+          Code generator with template metadata support.
+          
+          ### 📦 Downloads
+          
+          Choose the file for your platform:
+          
+          - **Windows (x64)**: `codegen-${{ steps.version.outputs.VERSION }}-Windows-x64.zip`
+          - **Windows (ARM64)**: `codegen-${{ steps.version.outputs.VERSION }}-Windows-ARM64.zip`
+          - **Linux (x64)**: `codegen-${{ steps.version.outputs.VERSION }}-Linux-x64.tar.gz`
+          - **Linux (ARM64)**: `codegen-${{ steps.version.outputs.VERSION }}-Linux-ARM64.tar.gz`
+          - **macOS (Intel)**: `codegen-${{ steps.version.outputs.VERSION }}-macOS-Intel.tar.gz`
+          - **macOS (Apple Silicon)**: `codegen-${{ steps.version.outputs.VERSION }}-macOS-AppleSilicon.tar.gz`
+          
+          ### ⚡ Features
+          
+          - Native AOT compilation (~2MB per executable)
+          - No .NET runtime required
+          - Fast startup time (< 10ms)
+          - Self-contained executables
+          
+          ### 📖 Documentation
+          
+          See [README.md](https://github.com/dantorquato/codegen#readme) for installation and usage instructions.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
