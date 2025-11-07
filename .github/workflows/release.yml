@@ -12,36 +12,28 @@ jobs:
     strategy:
       matrix:
         include:
-          # Windows
+          # Windows (native x64 only - ARM64 needs special runner)
           - os: windows-latest
             platform: Windows-x64
             runtime: win-x64
             extension: .exe
             archive: zip
-          - os: windows-latest
-            platform: Windows-ARM64
-            runtime: win-arm64
-            extension: .exe
-            archive: zip
           
-          # Linux
+          # Linux (native x64 only - ARM64 needs special runner)
           - os: ubuntu-latest
             platform: Linux-x64
             runtime: linux-x64
             extension: ''
             archive: tar.gz
-          - os: ubuntu-latest
-            platform: Linux-ARM64
-            runtime: linux-arm64
-            extension: ''
-            archive: tar.gz
           
-          # macOS
-          - os: macos-latest
+          # macOS Intel (native x64)
+          - os: macos-13
             platform: macOS-Intel
             runtime: osx-x64
             extension: ''
             archive: tar.gz
+          
+          # macOS Apple Silicon (native ARM64)
           - os: macos-latest
             platform: macOS-AppleSilicon
             runtime: osx-arm64
@@ -131,9 +123,7 @@ jobs:
           Choose the file for your platform:
           
           - **Windows (x64)**: `codegen-${{ steps.version.outputs.VERSION }}-Windows-x64.zip`
-          - **Windows (ARM64)**: `codegen-${{ steps.version.outputs.VERSION }}-Windows-ARM64.zip`
           - **Linux (x64)**: `codegen-${{ steps.version.outputs.VERSION }}-Linux-x64.tar.gz`
-          - **Linux (ARM64)**: `codegen-${{ steps.version.outputs.VERSION }}-Linux-ARM64.tar.gz`
           - **macOS (Intel)**: `codegen-${{ steps.version.outputs.VERSION }}-macOS-Intel.tar.gz`
           - **macOS (Apple Silicon)**: `codegen-${{ steps.version.outputs.VERSION }}-macOS-AppleSilicon.tar.gz`
           
