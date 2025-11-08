@@ -35,7 +35,7 @@ Use `codegen` from anywhere on your system.
 **macOS/Linux:**
 ```bash
 tar -xzf codegen-*.tar.gz
-sudo mv CodeGen /usr/local/bin/codegen
+sudo mv codegen /usr/local/bin/codegen
 
 # Now use from any directory
 cd ~/my-project
@@ -45,7 +45,7 @@ codegen User
 **Windows:**
 ```cmd
 # Extract zip, then move to a permanent location like:
-move CodeGen.exe C:\bin\codegen.exe
+move codegen.exe C:\bin\codegen.exe
 
 # Add C:\bin to your PATH environment variable
 # Then use from any directory:
@@ -60,7 +60,7 @@ Keep CodeGen in your project directory.
 **macOS/Linux:**
 ```bash
 tar -xzf codegen-*.tar.gz
-mv CodeGen my-project/codegen
+mv codegen my-project/codegen
 
 # Use with relative path
 cd my-project
@@ -70,7 +70,7 @@ cd my-project
 **Windows:**
 ```cmd
 # Extract and move to project
-move CodeGen.exe my-project\codegen.exe
+move codegen.exe my-project\codegen.exe
 
 # Use with relative path
 cd my-project
