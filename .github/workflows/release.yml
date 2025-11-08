@@ -71,13 +71,13 @@ jobs:
       if: matrix.archive == 'zip'
       shell: pwsh
       run: |
-        Compress-Archive -Path "./publish/CodeGen${{ matrix.extension }}" -DestinationPath "codegen-${{ steps.version.outputs.VERSION }}-${{ matrix.platform }}.zip"
+        Compress-Archive -Path "./publish/codegen${{ matrix.extension }}" -DestinationPath "codegen-${{ steps.version.outputs.VERSION }}-${{ matrix.platform }}.zip"
     
     - name: Create archive (Unix)
       if: matrix.archive == 'tar.gz'
       run: |
         cd publish
-        tar -czf "../codegen-${{ steps.version.outputs.VERSION }}-${{ matrix.platform }}.tar.gz" "CodeGen${{ matrix.extension }}"
+        tar -czf "../codegen-${{ steps.version.outputs.VERSION }}-${{ matrix.platform }}.tar.gz" "codegen${{ matrix.extension }}"
         cd ..
     
     - name: Upload artifact
